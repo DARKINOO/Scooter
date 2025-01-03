@@ -7,6 +7,7 @@ import VehiclePanel from '../components/VehiclePanel'
 import ConfirmRide from '../components/ConfirmRide'
 import LookingForDriver from '../components/LookingForDriver'
 import WaitingForDriver from '../components/WaitingForDriver'
+import MapComponent from '../components/MapComponent'
 
 const Home = () => {
   const [pickup, setPickup] = useState('')
@@ -31,15 +32,29 @@ const Home = () => {
   
   useGSAP(function(){
     if(panelOpen){
+      gsap.to('.find-trip-container', {
+        translateY: '15%',
+        duration: 0.5
+      })
     gsap.to(panelRef.current,{
       height:'70%',
       padding: 24,
-      opacity:1
+      opacity:1,
+      zIndex: 20
     })
     gsap.to(panelCloseRef.current,{
       opacity:1
     })
+    gsap.to('.map-container', {
+      scale: 0.95,
+      opacity: 0.8,
+      zIndex: 0
+    })
    }else{
+    gsap.to('.find-trip-container', {
+      translateY: '0%',
+      duration: 0.5
+    })
     gsap.to(panelRef.current,{
       height:'0%',
       padding:0,
@@ -47,6 +62,11 @@ const Home = () => {
     })
     gsap.to(panelCloseRef.current,{
       opacity:0
+    })
+    gsap.to('.map-container', {
+      scale: 1,
+      opacity: 1,
+      zIndex: 10
     })
    }
   }, [panelOpen])
@@ -102,12 +122,13 @@ useGSAP(function () {
 
   return (
     <div className='h-screen relative overflow-hidden'>
-      <h1 className='w-14 absolute mb-8 m-4 text-3xl font-bold text-black'>Goसफ़र</h1>
-      <div className='h-screen w-screen'>
-        <img className='h-full w-full object-cover' src="https://miro.medium.com/max/1280/0*gwMx05pqII5hbfmX.gif" alt="" />
+      <h1 className='w-14 absolute mb-8 m-4 ml-40 z-20 text-3xl font-bold text-black'>Goसफ़र</h1>
+      <div className='h-[70%] z-10 relative map-container transition-all duration-300'>
+       <MapComponent/>
       </div>
-      <div className='flex flex-col justify-end h-screen absolute top-0 w-full'>
-        <div className='h-[30%] bg-white p-6 relative'>
+      <div className='flex flex-col justify-end h-screen
+       absolute top-0 w-full find-trip-container transition-all duration-300'>
+        <div className='h-[30%] bg-white p-6 pt-4 relative'>
           <h5 ref={panelCloseRef} onClick={()=>{
             setPanelOpen(false)
           }} className='absolute opacity-0 right-6 top-6 text-2xl'>
@@ -144,18 +165,18 @@ useGSAP(function () {
             <LocationSearchPanel  setPanelOpen={setPanelOpen} setVehiclePanel={setVehiclePanel} />
        </div>
       </div>
-      <div ref={vehiclePanelRef} className="fixed w-full z-10 bottom-0 translate-y-full px-3 py-10 pt-14 bg-slate-100">
+      <div ref={vehiclePanelRef} className="fixed w-full z-20 bottom-0 translate-y-full px-3 py-10 pt-14 bg-slate-100">
         <VehiclePanel setConfirmRidePanel={setConfirmRidePanel} setVehiclePanel={setVehiclePanel} />
       </div>
-      <div ref={confirmRidePanelRef} className="fixed w-full z-10 bottom-0 translate-y-full px-3 py-10 pt-14 bg-white">
+      <div ref={confirmRidePanelRef} className="fixed w-full z-20 bottom-0 translate-y-full px-3 py-10 pt-14 bg-white">
       <ConfirmRide
        setConfirmRidePanel={setConfirmRidePanel} 
        setVehicleFound={setVehicleFound}  />
       </div>
-      <div ref={vehicleFoundRef} className="fixed w-full z-10 bottom-0 translate-y-full px-3 py-10 pt-14 bg-white">
+      <div ref={vehicleFoundRef} className="fixed w-full z-20 bottom-0 translate-y-full px-3 py-10 pt-14 bg-white">
         <LookingForDriver  setVehicleFound={setVehicleFound}/>
       </div>
-      <div ref={waitingForDriverRef} className="fixed w-full z-10 bottom-0 translate-y-full px-3 py-10 pt-14 bg-white">
+      <div ref={waitingForDriverRef} className="fixed w-full z-20 bottom-0 translate-y-full px-3 py-10 pt-14 bg-white">
         <WaitingForDriver waitingForDriver={waitingForDriver} />
       </div>
     </div>

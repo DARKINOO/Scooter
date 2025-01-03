@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import FinishRide from '../components/FinishRide'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
+import MapComponent from '../components/MapComponent'
 // import LiveTracking from '../components/LiveTracking'
 
 const CaptainRiding = () => {
@@ -28,20 +29,21 @@ const CaptainRiding = () => {
 
 
     return (
-        <div className='h-screen relative flex flex-col justify-end'>
+        <div className='h-screen relative flex flex-col'>
 
-            <div className='fixed p-6 top-0 flex items-center justify-between w-screen'>
-            <h1 className='w-10 mb-8 text-3xl font-bold text-black'>Goसफ़र</h1>
+            <div className='fixed p-6 top-0 flex items-center z-10 justify-between w-screen'>
+            <h1 className='w-10 mb-8 ml-12 text-3xl font-bold text-black'>Goसफ़र</h1>
                 <Link to='/captain-home' className='  h-10 w-10 bg-black text-white flex items-center justify-center rounded-full'>
                     <i className="text-lg font-bold ri-logout-box-r-line"></i>
                 </Link>
             </div>
-            <div className='h-4/5'>
-                 <img className='h-full w-full object-cover' src="https://miro.medium.com/max/1280/0*gwMx05pqII5hbfmX.gif" alt="" />
+            <div className='h-[75%] relative'>
+              <MapComponent/>
+                 {/* <img className='h-full w-full object-cover' src="https://miro.medium.com/max/1280/0*gwMx05pqII5hbfmX.gif" alt="" /> */}
 
             </div>
 
-            <div className='h-1/5 p-6  flex items-center justify-between relative bg-yellow-400 pt-10'
+            <div className='h-[25%] p-6  flex items-center justify-between relative bg-yellow-400 pt-0'
                 onClick={() => {
                     setFinishRidePanel(true)
                 }}
