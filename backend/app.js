@@ -7,7 +7,17 @@ const cookieParser = require('cookie-parser');
 const connectToDb = require('./db/db');
 const userRoutes = require('./routes/user.routes');
 const captainRoutes = require('./routes/captain.routes');
+const mapRoutes = require('./routes/maps.routes');
+const rideRoutes = require('./routes/ride.routes');
+
 connectToDb();
+
+// Rate limiter for map APIs
+const rateLimit = require('express-rate-limit');
+const mapLimiter = rateLimit({
+    windowMs: 1000, // 1 second
+    max: 1
+});
 
 app.use(cors());
 app.use(express.json());
@@ -20,5 +30,8 @@ app.get('/', (req, res)=> {
 
 app.use('/users', userRoutes);
 app.use('/captains', captainRoutes);
+app.use('/maps', mapLimiter, mapRoutes);
+app.use('/rides', rideRoutes);
+
 
 module.exports = app;
