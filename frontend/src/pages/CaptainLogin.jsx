@@ -22,7 +22,6 @@ const CaptainLogin = () => {
 
    if (response.status === 200) {
      const data = response.data
-
      setCaptain(data.captain)
      localStorage.setItem('token', data.token)
      navigate('/captain-home')
@@ -38,7 +37,7 @@ const CaptainLogin = () => {
         <h1 className='w-14 mb-8 text-3xl font-bold text-black'>Goसफ़र</h1>
         <form onSubmit={(e)=>{
             submitHandler(e)
-        }}>
+        }}>   
             <h3 className='text-xl mb-2'>What's your email</h3>
             
             <input

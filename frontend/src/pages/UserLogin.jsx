@@ -14,6 +14,7 @@ const UserLogin = () => {
 
   const submitHandler = async (e)=>{
    e.preventDefault();
+   
    const userData ={
     email:email,
     password:password
@@ -38,7 +39,7 @@ const UserLogin = () => {
         <h1 className='w-14 mb-8 text-3xl font-bold text-black'>Goसफ़र</h1>
         <form onSubmit={(e)=>{
             submitHandler(e)
-        }}>
+          }}>
             <h3 className='text-xl mb-2'>What's your email</h3>
             
             <input
@@ -59,7 +60,7 @@ const UserLogin = () => {
              }}
             required type="password" placeholder='password'/>
             
-            <button className='flex items-center justify-center w-full bg-yellow-400 text-black font-bold text-xl py-3 rounded mt-5'>Login</button>
+            <button className='flex items-center justify-center w-full bg-yellow-400 text-black font-bold text-xl py-3 rounded mt-5 placeholder:text-base'>Login</button>
         </form>
         <p className='text-center mt-4'>New here?<Link to='/signup' className='text-blue-600'>Create New Account</Link></p> 
         </div>

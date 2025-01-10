@@ -1,32 +1,125 @@
 import React, { useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { data, Link } from 'react-router-dom'
 import CaptainDetails from '../components/CaptainDetails'
 import RidePopUp from '../components/RidePopUp'
 import ConfirmRidePopUp from '../components/ConfirmRidePopUp'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
 import MapComponent from '../components/MapComponent'
+import { useEffect, useContext } from 'react'
+import { SocketContext } from '../context/SocketContext'
+import { CaptainDataContext } from '../context/CaptainContext'
+import axios from 'axios'
 
 const CaptainHome = () => {
 
-  const [ ridePopupPanel, setRidePopupPanel ] = useState(true)
+  const [ ridePopupPanel, setRidePopupPanel ] = useState(false)
   const [ confirmRidePopupPanel, setConfirmRidePopupPanel ] = useState(false)
 
 
   const ridePopupPanelRef = useRef(null)
   const confirmRidePopupPanelRef = useRef(null)
+  const [ ride, setRide ] = useState(null)
 
-  useGSAP(function () {
-    if (ridePopupPanel) {
-        gsap.to(ridePopupPanelRef.current, {
-            transform: 'translateY(0)'
-        })
-    } else {
-        gsap.to(ridePopupPanelRef.current, {
-            transform: 'translateY(100%)'
-        })
+  const { socket } = useContext(SocketContext)
+  const { captain } = useContext(CaptainDataContext)
+
+useEffect(() => {
+    if (!socket || !captain?._id) return;
+
+    // Join socket room
+    socket.emit('join', {
+      userId: captain._id,
+      userType: 'captain'
+    });
+
+    // Debug logging
+    console.log('Captain socket setup:', {
+      captainId: captain._id,
+      socketId: socket.id,
+      socketConnected: socket.connected
+    });
+
+    // Handle new ride events
+    const handleNewRide = (data) => {
+      console.log('New ride received:', data);
+      if (data) {
+        setRide(data);
+        setRidePopupPanel(true);
+        console.log('Setting ride popup panel to true');
+      }
+    };
+
+    // Register event listener
+    socket.on('new-ride', handleNewRide);
+
+    // Location update logic
+    const updateLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            const newLocation = {
+              lat: position.coords.latitude,
+              lon: position.coords.longitude
+            };
+            
+            socket.emit('update-location-captain', {
+              userId: captain._id,
+              location: newLocation
+            });
+          },
+          error => console.error('Geolocation error:', error)
+        );
+      }
+    };
+
+    // Set up location updates
+    const locationInterval = setInterval(updateLocation, 10000);
+    updateLocation(); // Initial update
+
+    // Cleanup function
+    return () => {
+      socket.off('new-ride', handleNewRide);
+      clearInterval(locationInterval);
+    };
+  }, [socket, captain]);
+  
+  async function confirmRide() {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/rides/confirm`,
+        {
+          rideId: ride._id,
+          captainId: captain._id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`
+          }
+        }
+      );
+      
+      setRidePopupPanel(false);
+      setConfirmRidePopupPanel(true);
+    } catch (error) {
+      console.error('Error confirming ride:', error);
     }
-}, [ ridePopupPanel ])
+  }
+
+  useGSAP(() => {
+    if (ridePopupPanel) {
+      console.log('Animating ride popup panel to show');
+      gsap.to(ridePopupPanelRef.current, {
+        transform: 'translateY(0)',
+        duration: 0.5
+      });
+    } else {
+      gsap.to(ridePopupPanelRef.current, {
+        transform: 'translateY(100%)',
+        duration: 0.5
+      });
+    }
+  }, [ridePopupPanel]);
 
 useGSAP(function () {
   if (confirmRidePopupPanel) {
@@ -57,12 +150,18 @@ useGSAP(function () {
               <CaptainDetails/>
             </div>
             <div ref={ridePopupPanelRef} className='fixed w-full z-20 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
-                <RidePopUp setRidePopupPanel={setRidePopupPanel} setConfirmRidePopupPanel={setConfirmRidePopupPanel}
-                
-                />
+            {ride && <RidePopUp
+          ride={ride}
+          setRide={setRide}
+          confirmRide={confirmRide}
+          setRidePopupPanel={setRidePopupPanel}
+          setConfirmRidePopupPanel={setConfirmRidePopupPanel}
+        />}
             </div>
             <div ref={confirmRidePopupPanelRef} className='fixed h-[100%] w-full z-20 bottom-0 translate-y-full bg-white px-3 py-10 pt-12'>
-                <ConfirmRidePopUp setConfirmRidePopupPanel={setConfirmRidePopupPanel}
+                <ConfirmRidePopUp
+                 ride={ride} 
+                setConfirmRidePopupPanel={setConfirmRidePopupPanel}
                 setRidePopupPanel={setRidePopupPanel}
                 />
             </div>

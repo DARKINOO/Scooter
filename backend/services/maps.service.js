@@ -99,6 +99,31 @@ module.exports.getRoute = async (origin, destination) => {
     }
 };
 
-module.exports.getCaptainsInTheRadius = async (lat, lon, radius) => {
-    // Implementation for fetching captains in the radius
+// 
+
+module.exports.getCaptainsInTheRadius = async (lat, lng, radiusInKm) => {
+    console.log('Starting captain search with:', { lat, lng, radiusInKm });
+
+    // Debug: Check all captain locations first
+    const allCaptains = await captainModel.find({});
+    console.log('All captains in DB:', allCaptains.map(c => ({
+        id: c._id,
+        location: c.location,
+        isAvailable: c.isAvailable
+    })));
+
+    const captains = await captainModel.find({
+        location: {
+            $geoWithin: {
+                $centerSphere: [
+                    [parseFloat(lng), parseFloat(lat)],
+                    radiusInKm / 6371 // Convert km to radians
+                ]
+            }
+        },
+        isAvailable: true
+    }).exec();
+
+    console.log('Found captains in radius:', captains);
+    return captains;
 };
