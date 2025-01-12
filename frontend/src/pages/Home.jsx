@@ -50,11 +50,13 @@ const Home = () => {
     socket.emit("join", { userType: "user", userId: user._id })
   }, [user])
 
-  socket.on('ride-confirmed', ride => {
-    setVehicleFound(false)
-    setWaitingForDriver(true)
-    setRide(ride)
-  })
+ 
+  socket.on('ride-confirmed', (confirmedRide) => {
+    console.log('Received ride-confirmed event:', confirmedRide);
+    setVehicleFound(false);
+    setWaitingForDriver(true);
+    setRide(confirmedRide);
+  });
 
   socket.on('ride-started', ride => {
     console.log("ride")

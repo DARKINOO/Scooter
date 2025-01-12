@@ -119,7 +119,12 @@ module.exports.confirmRide = async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
 
+        // Debug logging
+        console.log('Captain data:', req.captain);
+        console.log('Ride ID:', req.body.rideId);
+
         const { rideId } = req.body;
+        
         const ride = await rideService.confirmRide({ 
             rideId, 
             captain: req.captain 
@@ -131,11 +136,14 @@ module.exports.confirmRide = async (req, res) => {
                 data: ride
             });
         }
-
         return res.status(200).json(ride);
 
     } catch (err) {
-        console.error('Confirm ride error:', err);
+        console.error('Confirm ride error details:', {
+            error: err.message,
+            captain: req.captain,
+            rideId: req.body.rideId
+        });
         return res.status(500).json({ message: err.message });
     }
 };

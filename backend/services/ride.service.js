@@ -43,7 +43,6 @@ async function getFare(pickup, destination) {
 }
 module.exports.getFare = getFare;
 
-
 function getOtp(num) {
     function generateOtp(num) {
         const otp = crypto.randomInt(Math.pow(10, num - 1), Math.pow(10, num)).toString();
@@ -51,73 +50,6 @@ function getOtp(num) {
     }
     return generateOtp(num);
 }
-// module.exports.createRide = async ({
-//     user, pickup, destination, vehicleType
-// }) => {
-//     if (!user || !pickup || !destination || !vehicleType) {
-//         throw new Error('All fields are required');
-//     }
-
-//         // Validate coordinates
-//         if (!coordinates?.pickup?.coordinates || !coordinates?.destination?.coordinates) {
-//             // If coordinates weren't provided, fetch them
-//             const pickupCoords = await mapService.getAddressCoordinate(pickup);
-//             const destinationCoords = await mapService.getAddressCoordinate(destination);
-    
-//             if (!pickupCoords || !destinationCoords) {
-//                 throw new Error('Failed to get location coordinates');
-//             }
-    
-//             coordinates = {
-//                 pickup: {
-//                     type: 'Point',
-//                     coordinates: [pickupCoords.lng, pickupCoords.ltd]
-//                 },
-//                 destination: {
-//                     type: 'Point',
-//                     coordinates: [destinationCoords.lng, destinationCoords.ltd]
-//                 }
-//             };
-//         }
-
-//     const fare = await getFare(pickup, destination);
-
-
-//     const ride = rideModel.create({
-//         user,
-//         pickup,
-//         destination,
-//         pickupLocation: coordinates.pickup,
-//         destinationLocation: coordinates.destination,
-//         otp: getOtp(6),
-//         fare: fare[vehicleType],
-//         vehicleType
-//     })
-
-//     return ride;
-// }
-
-// module.exports.createRide = async ({
-//     user, pickup, destination, vehicleType
-// }) => {
-//     if (!user || !pickup || !destination || !vehicleType) {
-//         throw new Error('All fields are required');
-//     }
-
-//     const fare = await getFare(pickup, destination);
-
-
-
-//     const ride = rideModel.create({
-//         user,
-//         pickup,
-//         destination,
-//         otp: getOtp(6),
-//         fare: fare[ vehicleType ]
-//     })
-
-//     return ride;
-// }
 
 module.exports.createRide = async ({
     user, pickup, destination, vehicleType
@@ -162,28 +94,52 @@ module.exports.createRide = async ({
 module.exports.confirmRide = async ({
     rideId, captain
 }) => {
+    // Validate required parameters
     if (!rideId) {
         throw new Error('Ride id is required');
     }
+    if (!captain || !captain._id) {
+        throw new Error('Valid captain data is required');
+    }
 
-    await rideModel.findOneAndUpdate({
-        _id: rideId
-    }, {
-        status: 'accepted',
-        captain: captain._id
-    })
+    // First check if the ride exists and is in a valid state
+    const existingRide = await rideModel.findOne({
+        _id: rideId,
+        status: 'pending' // Only allow confirming pending rides
+    });
 
-    const ride = await rideModel.findOne({
+    if (!existingRide) {
+        throw new Error('Ride not found or not in pending state');
+    }
+
+    // Update the ride with captain info and change status
+    const updatedRide = await rideModel.findOneAndUpdate(
+        {
+            _id: rideId,
+            status: 'pending' // Extra check to prevent race conditions
+        },
+        {
+            status: 'accepted',
+            captain: captain._id
+        },
+        { new: true } // Return updated document
+    );
+
+    if (!updatedRide) {
+        throw new Error('Failed to update ride status');
+    }
+
+    // Populate user and captain details
+    const populatedRide = await rideModel.findOne({
         _id: rideId
     }).populate('user').populate('captain').select('+otp');
 
-    if (!ride) {
-        throw new Error('Ride not found');
+    if (!populatedRide) {
+        throw new Error('Failed to retrieve updated ride details');
     }
 
-    return ride;
-
-}
+    return populatedRide;
+};
 
 module.exports.startRide = async ({ rideId, otp, captain }) => {
     if (!rideId || !otp) {

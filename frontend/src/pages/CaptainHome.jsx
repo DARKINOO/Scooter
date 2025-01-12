@@ -24,6 +24,41 @@ const CaptainHome = () => {
   const { socket } = useContext(SocketContext)
   const { captain } = useContext(CaptainDataContext)
 
+
+
+  useEffect(() => {
+    // Verify captain authentication on component mount
+    const verifyAuth = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          navigate('/captain-login');
+          return;
+        }
+  
+        // Try to get captain profile to verify token
+        const response = await axios.get(
+          `${import.meta.env.VITE_BASE_URL}/captains/profile`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+        
+        if (!response.data.captain) {
+          localStorage.removeItem('token');
+          navigate('/captain-login');
+        }
+      } catch (error) {
+        localStorage.removeItem('token');
+        navigate('/captain-login');
+      }
+    };
+  
+    verifyAuth();
+  }, []);  
+
 useEffect(() => {
     if (!socket || !captain?._id) return;
 
@@ -60,8 +95,10 @@ useEffect(() => {
           position => {
             const newLocation = {
               lat: position.coords.latitude,
-              lon: position.coords.longitude
+              lng: position.coords.longitude
             };
+
+            console.log('Updating captain location:', newLocation);
             
             socket.emit('update-location-captain', {
               userId: captain._id,
@@ -83,29 +120,55 @@ useEffect(() => {
       clearInterval(locationInterval);
     };
   }, [socket, captain]);
-  
+ 
   async function confirmRide() {
     try {
+      const token = localStorage.getItem('token');
+      console.log('Attempting to confirm ride with stored token');
+      
+      if (!token) {
+        console.error('No token found - redirecting to login');
+        navigate('/captain-login');
+        // Redirect to login or show error
+        return;
+      }
+  
+      if (!captain || !captain._id) {
+        console.error('No captain data found');
+        // Redirect to login or show error
+        return;
+      }
+  
       const response = await axios.post(
         `${import.meta.env.VITE_BASE_URL}/rides/confirm`,
         {
-          rideId: ride._id,
-          captainId: captain._id,
+          rideId: ride._id
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         }
       );
       
+      console.log('Ride confirmation successful:', response.data);
       setRidePopupPanel(false);
       setConfirmRidePopupPanel(true);
     } catch (error) {
-      console.error('Error confirming ride:', error);
+      console.error('Error confirming ride:', error.response?.data);
+      if (error.response?.data?.message === 'Invalid account type. Please login as a captain.') {
+        // Handle case where user is logged in with wrong account type
+        alert('Please login with your captain account');
+        localStorage.removeItem('token');
+        navigate('/captain-login');
+        // Redirect to captain login
+      } else {
+        alert(error.response?.data?.message || 'Failed to confirm ride');
+      }
     }
   }
-
+ 
   useGSAP(() => {
     if (ridePopupPanel) {
       console.log('Animating ride popup panel to show');

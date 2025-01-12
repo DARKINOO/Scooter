@@ -13,6 +13,9 @@ const CaptainLogin = () => {
 
   const submitHandler = async (e)=>{
    e.preventDefault();
+
+   localStorage.removeItem('token');
+
    const captain ={
     email:email,
     password:password
