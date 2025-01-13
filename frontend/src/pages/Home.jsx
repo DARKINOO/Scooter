@@ -299,11 +299,11 @@ async function createRide() {
       const coordinates = {
           pickup: {
               type: "Point",
-              coordinates: [pickupRes.data.lng, pickupRes.data.ltd]
+              coordinates: [pickupRes.data.lng, pickupRes.data.lat]
           },
           destination: {
               type: "Point",
-              coordinates: [destinationRes.data.lng, destinationRes.data.ltd]
+              coordinates: [destinationRes.data.lng, destinationRes.data.lat]
           }
       };
 
@@ -333,9 +333,10 @@ async function createRide() {
       <h1 className='w-14 absolute mb-8 m-4 ml-40 z-20 text-3xl font-bold text-black'>Goसफ़र</h1>
       <div className='h-[70%] z-10 relative map-container transition-all duration-300'>
         <MapComponent 
-          pickupCoords={pickupCoords}
-          destinationCoords={destinationCoords}
+          pickupCoords={pickupCoords ? [pickupCoords.lat, pickupCoords.lng] : null}
+          destinationCoords={destinationCoords ? [destinationCoords.lat, destinationCoords.lng] : null}
           routeCoordinates={routeCoordinates}
+          showRoute={vehiclePanel || confirmRidePanel || vehicleFound || waitingForDriver}
         />
       </div>
       <div className='flex flex-col justify-end h-screen absolute top-0 w-full find-trip-container transition-all duration-300'>

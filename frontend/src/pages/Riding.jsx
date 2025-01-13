@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom' // Added useLocation
-import MapComponent from '../components/MapComponent'
 import { SocketContext } from '../context/SocketContext'
+import LiveTrackingComponent from '../components/LiveTrackingComponent'
 
 
 const Riding = () => {
@@ -24,7 +24,12 @@ const Riding = () => {
             </Link>
             </div>
             <div className='h-[60%] relative'>
-              <MapComponent/>
+            <LiveTrackingComponent
+             pickupCoords={ride ? [ride?.pickupLocation?.coordinates[1], ride?.pickupLocation?.coordinates[0]] : null}
+            destinationCoords={ride ? [ride?.destinationLocation?.coordinates[1], ride?.destinationLocation?.coordinates[0]] : null}
+            socket={socket}
+            rideId={ride?._id}
+               />
                  {/* <img className='h-full w-full object-cover' src="https://miro.medium.com/max/1280/0*gwMx05pqII5hbfmX.gif" alt="" /> */}
 
             </div>

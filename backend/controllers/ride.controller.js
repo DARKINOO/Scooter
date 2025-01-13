@@ -14,9 +14,9 @@ module.exports.createRide = async (req, res) => {
         const destinationCoords = await mapService.getAddressCoordinate(destination);
 
         // Convert string coordinates to numbers and validate
-        const pickupLng = parseFloat(pickupCoords.lon);
+        const pickupLng = parseFloat(pickupCoords.lng);
         const pickupLat = parseFloat(pickupCoords.lat);
-        const destLng = parseFloat(destinationCoords.lon);
+        const destLng = parseFloat(destinationCoords.lng);
         const destLat = parseFloat(destinationCoords.lat);
 
         if (isNaN(pickupLng) || isNaN(pickupLat) || isNaN(destLng) || isNaN(destLat)) {

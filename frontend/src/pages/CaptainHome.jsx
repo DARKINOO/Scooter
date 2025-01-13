@@ -78,6 +78,8 @@ useEffect(() => {
     // Handle new ride events
     const handleNewRide = (data) => {
       console.log('New ride received:', data);
+      console.log('Pickup coordinates:', data.pickupLocation?.coordinates);
+      console.log('Destination coordinates:', data.destinationLocation?.coordinates);
       if (data) {
         setRide(data);
         setRidePopupPanel(true);
@@ -88,6 +90,7 @@ useEffect(() => {
     // Register event listener
     socket.on('new-ride', handleNewRide);
 
+    //Uncaught Error: Invalid LatLng object: (undefined, undefined)
     // Location update logic
     const updateLocation = () => {
       if (navigator.geolocation) {
@@ -120,7 +123,7 @@ useEffect(() => {
       clearInterval(locationInterval);
     };
   }, [socket, captain]);
- 
+
   async function confirmRide() {
     try {
       const token = localStorage.getItem('token');
@@ -168,6 +171,7 @@ useEffect(() => {
       }
     }
   }
+
  
   useGSAP(() => {
     if (ridePopupPanel) {
@@ -205,7 +209,12 @@ useGSAP(function () {
             </Link>
             </div>
             <div className='h-[60%] relative'>
-              <MapComponent/>
+              <MapComponent
+                   pickupCoords={ride ? [ride?.pickupLocation?.coordinates[1], ride?.pickupLocation?.coordinates[0]] : null}
+                   destinationCoords={ride ? [ride?.destinationLocation?.coordinates[1], ride?.destinationLocation?.coordinates[0]] : null}
+                   ride={ride}
+                   showRoute={confirmRidePopupPanel}
+              />
                  {/* <img className='h-full w-full object-cover' src="https://miro.medium.com/max/1280/0*gwMx05pqII5hbfmX.gif" alt="" /> */}
 
             </div>

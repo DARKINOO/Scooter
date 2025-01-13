@@ -77,11 +77,11 @@ module.exports.createRide = async ({
         destination,
         pickupLocation: {
             type: 'Point',
-            coordinates: [parseFloat(pickupCoords.lon), parseFloat(pickupCoords.lat)]
+            coordinates: [parseFloat(pickupCoords.lng), parseFloat(pickupCoords.lat)]
         },
         destinationLocation: {
             type: 'Point',
-            coordinates: [parseFloat(destinationCoords.lon), parseFloat(destinationCoords.lat)]
+            coordinates: [parseFloat(destinationCoords.lng), parseFloat(destinationCoords.lat)]
         },
         otp: getOtp(6),
         fare: fare[vehicleType],

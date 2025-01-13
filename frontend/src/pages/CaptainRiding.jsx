@@ -1,10 +1,11 @@
-import React, { useRef, useState } from 'react'
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import FinishRide from '../components/FinishRide'
 import { useGSAP } from '@gsap/react'
 import gsap from 'gsap'
-import MapComponent from '../components/MapComponent'
-// import LiveTracking from '../components/LiveTracking'
+import { SocketContext } from '../context/SocketContext';
+import LiveTrackingComponent from '../components/LiveTrackingComponent'
+
 
 const CaptainRiding = () => {
 
@@ -12,7 +13,36 @@ const CaptainRiding = () => {
     const finishRidePanelRef = useRef(null)
     const location = useLocation()
     const rideData = location.state?.ride
+    const { ride } = location.state || {} // Retrieve ride data
+    const { socket } = useContext(SocketContext);
 
+    useEffect(() => {
+        if (ride?.status === 'accepted') {
+          // Set up continuous location tracking
+          const watchId = navigator.geolocation.watchPosition(
+            (position) => {
+              const location = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+              };
+              
+              // Emit location update through socket
+              socket.emit('update-captain-location', {
+                rideId: ride._id,
+                location: location
+              });
+            },
+            (error) => console.error('Geolocation error:', error),
+            { 
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
+            }
+          );
+      
+          return () => navigator.geolocation.clearWatch(watchId);
+        }
+      }, [ride?.status, socket]);
 
 
     useGSAP(function () {
@@ -38,7 +68,12 @@ const CaptainRiding = () => {
                 </Link>
             </div>
             <div className='h-[75%] relative'>
-              <MapComponent/>
+            <LiveTrackingComponent
+           pickupCoords={ride ? [ride?.pickupLocation?.coordinates[1], ride?.pickupLocation?.coordinates[0]] : null}
+          destinationCoords={ride ? [ride?.destinationLocation?.coordinates[1], ride?.destinationLocation?.coordinates[0]] : null}
+        socket={socket}
+          rideId={ride?._id}
+            />
                  {/* <img className='h-full w-full object-cover' src="https://miro.medium.com/max/1280/0*gwMx05pqII5hbfmX.gif" alt="" /> */}
 
             </div>

@@ -60,7 +60,7 @@ const UserLogin = () => {
              }}
             required type="password" placeholder='password'/>
             
-            <button className='flex items-center justify-center w-full bg-yellow-400 text-black font-bold text-xl py-3 rounded mt-5 placeholder:text-base'>Login</button>
+            <button type="submit" className='flex items-center justify-center w-full bg-yellow-400 text-black font-bold text-xl py-3 rounded mt-5 placeholder:text-base'>Login</button>
         </form>
         <p className='text-center mt-4'>New here?<Link to='/signup' className='text-blue-600'>Create New Account</Link></p> 
         </div>
