@@ -12,7 +12,7 @@ const CaptainContext = ({ children }) => {
         const fetchCaptainData = async () => {
             setIsLoading(true);
             try {
-                const response = await axios.get(`${import.meta.env.VITE_BASE_URL}/profile`, {
+                const response = await axios.get(`${import.meta.env.VITE_BASE_URL_AUTH}/profile`, {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }

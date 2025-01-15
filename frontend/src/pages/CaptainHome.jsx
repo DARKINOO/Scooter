@@ -38,7 +38,7 @@ const CaptainHome = () => {
   
         // Try to get captain profile to verify token
         const response = await axios.get(
-          `${import.meta.env.VITE_BASE_URL}/captains/profile`,
+          `${import.meta.env.VITE_BASE_URL_AUTH}/captains/profile`,
           {
             headers: {
               'Authorization': `Bearer ${token}`
