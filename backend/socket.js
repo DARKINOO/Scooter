@@ -10,7 +10,10 @@ function initializeSocket(server) {
                 "http://localhost:5173", 
                 "http://127.0.0.1:5173",
                 "https://9vrc9sd2-5173.inc1.devtunnels.ms",
-                "http://9vrc9sd2-5173.inc1.devtunnels.ms"
+                "http://9vrc9sd2-5173.inc1.devtunnels.ms",
+                'https://gosafar.vercel.app',
+                'https://gosafar-git-main-yash-jains-projects-4d3bfc06.vercel.app',
+                'https://gosafar-68htry3aq-yash-jains-projects-4d3bfc06.vercel.app'
             ],
             methods: ["GET", "POST"],
             credentials: true,
@@ -21,7 +24,7 @@ function initializeSocket(server) {
         pingInterval: 25000,
         upgradeTimeout: 30000,
         agent: false,
-        rejectUnauthorized: false // Only use during development
+        //rejectUnauthorized: false // Only use during development
     });
 
     io.use((socket, next) => {
