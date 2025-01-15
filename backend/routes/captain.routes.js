@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const { body } = require("express-validator")
 const authMiddleware = require('../middlewares/auth.middleware');
-
+const { updateLocation } = require('../controllers/captain.controller');
 
 router.post('/register', [
     body('email').isEmail().withMessage('Invalid Email'),
@@ -25,6 +25,7 @@ router.post('/login', [
     captainController.loginCaptain
 )
 
+router.post('/update-location', authMiddleware.authCaptain, captainController.updateLocation);
 
 router.get('/profile', authMiddleware.authCaptain, captainController.getCaptainProfile)
 

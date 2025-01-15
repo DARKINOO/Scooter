@@ -2,6 +2,7 @@ const captainModel = require('../models/captain.model');
 const captainService = require('../services/captain.service');
 const blacklistTokenModel = require('../models/blacklistToken.model');
 const { validationResult } = require('express-validator');
+const Captain = require('../models/captain.model');
 
 module.exports.registerCaptain = async (req, res, next) => {
 
@@ -64,6 +65,63 @@ module.exports.loginCaptain = async (req, res, next) => {
 
     res.status(200).json({ token, captain });
 }
+
+module.exports.updateLocation = async (req, res) => {
+    try {
+        // Get location data from request
+        const { lat, lng } = req.body;
+        
+        // Validate location data
+        if (typeof lat !== 'number' || typeof lng !== 'number') {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid location coordinates. Latitude and longitude must be numbers.'
+            });
+        }
+
+        // Get captain ID from auth middleware
+        const captainId = req.captain._id;
+
+        // Update captain's location
+        const updatedCaptain = await Captain.findByIdAndUpdate(
+            captainId,
+            {
+                location: {
+                    type: 'Point',
+                    coordinates: [lng, lat] // MongoDB uses [longitude, latitude] order
+                }
+            },
+            { new: true } // Return updated document
+        );
+
+        if (!updatedCaptain) {
+            return res.status(404).json({
+                success: false,
+                message: 'Captain not found'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: 'Location updated successfully',
+            data: {
+                location: updatedCaptain.location
+            }
+        });
+
+    } catch (error) {
+        console.error('Error updating captain location:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error updating location',
+            error: error.message
+        });
+    }
+};
+
+// module.exports = {
+//     updateLocation
+// };
 
 module.exports.getCaptainDetails = async (req, res) => {
     try {

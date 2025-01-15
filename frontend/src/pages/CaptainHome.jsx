@@ -92,27 +92,57 @@ useEffect(() => {
 
     //Uncaught Error: Invalid LatLng object: (undefined, undefined)
     // Location update logic
+   
     const updateLocation = () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          position => {
-            const newLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            };
-
-            console.log('Updating captain location:', newLocation);
-            
+      if (!navigator.geolocation) {
+        console.error('Geolocation is not supported by this browser');
+        return;
+      }
+    
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude: lat, longitude: lng } = position.coords;
+    
+          try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+              console.error('No authentication token found');
+              return;
+            }
+    
+            // Update location in database via API call
+            const response = await axios.post(
+              `${import.meta.env.VITE_BASE_URL}/captains/update-location`,
+              { lat, lng }, // Send as individual fields
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+              }
+            );
+    
+            console.log('Location updated successfully:', response.data);
+    
+            // Then emit to socket
             socket.emit('update-location-captain', {
               userId: captain._id,
-              location: newLocation
+              location: { lat, lng },
             });
-          },
-          error => console.error('Geolocation error:', error)
-        );
-      }
+          } catch (error) {
+            console.error('Failed to update location:', error);
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
     };
-
     // Set up location updates
     const locationInterval = setInterval(updateLocation, 10000);
     updateLocation(); // Initial update
