@@ -21,7 +21,7 @@ const mapLimiter = rateLimit({
 
 app.use(cors());
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'],
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173','https://gosafar.vercel.app/','https://gosafar-git-main-yash-jains-projects-4d3bfc06.vercel.app/','https://gosafar-68htry3aq-yash-jains-projects-4d3bfc06.vercel.app/'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization']
